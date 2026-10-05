@@ -16,12 +16,17 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
+    defer-datasource-initialization: true
     properties:
       hibernate:
         format_sql: true
 
-  jwt:
-    secret: "9a8f7e6d5c4b3a210987654321abcdef9a8f7e6d5c4b3a210987654321abcdef"
-    expiration: 86400000
+  sql:
+    init:
+      mode: always
+
+jwt:
+  secret: ${JWT_SECRET:miClaveSecretaParaDesarrolloLocalConLargoSuficiente123456}
+  expiration-minutes: 60

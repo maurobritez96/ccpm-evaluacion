@@ -34,37 +34,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-        return mapToDto(user);
-    }
-
-    @Override
     public UserResponseDto createUser(UserRequestDto requestDto) {
         if (userRepository.existsByEmail(requestDto.email())) {
             throw new UserAlreadyExistsException("El correo ya registrado");
         }
         String token = jwtService.generateToken(requestDto.email());
 
-
-        User user = new User();
-        user.setName(requestDto.name());
-        user.setEmail(requestDto.email());
-        user.setPassword(requestDto.password()); // Recuerda encriptar si usas Spring Security
-        user.setToken(token); // O tu lógica para generar el token JWT
-
         List<Phone> phones = requestDto.phones() != null
-                ? requestDto.phones().stream().map(phoneDto -> {
-            Phone phone = new Phone();
-            phone.setNumber(phoneDto.number());
-            phone.setCityCode(phoneDto.citycode());
-            phone.setContryCode(phoneDto.contrycode()); // Ajustado al getter del DTO
-            return phone;
-        }).toList()
-                : new ArrayList<>();
+                ? requestDto.phones().stream()
+                .map(phoneDto -> Phone.builder()
+                        .number(phoneDto.number())
+                        .cityCode(phoneDto.citycode())
+                        .contryCode(phoneDto.contrycode())
+                        .build())
+                .toList()
+                : List.of();
 
-        user.setPhones(phones);
+        User user = User.builder()
+                .name(requestDto.name())
+                .email(requestDto.email())
+                .password(requestDto.password())
+                .token(token)
+                .phones(phones)
+                .isActive(true)
+                .build();
 
         User savedUser = userRepository.save(user);
         return mapToDto(savedUser);

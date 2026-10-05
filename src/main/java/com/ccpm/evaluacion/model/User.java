@@ -37,6 +37,7 @@ public class User {
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
+    @Column(nullable = false, length = 1000)
     private String token;
 
     @Column(name = "is_active")
